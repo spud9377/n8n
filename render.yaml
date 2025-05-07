@@ -1,48 +1,37 @@
 ############################################
 #  render.yaml – Déploiement n8n + IMAP    #
 ############################################
-# Ce fichier crée :
-#  • 1 service Web « n8n » (plan gratuit)
-#  • 1 base PostgreSQL gratuite « n8nDB »
-# Remplis (ou saisis via l’UI Render) les
-# variables sensibles marquées « <…> ».
+# 1 web service « n8n »  (plan gratuit)
+# 1 base PostgreSQL     (plan gratuit)
+# Renseigne les valeurs marquées <…> dans l’UI Render
 ############################################
 
 services:
   - type: web
-    name: n8n                       # nom du service Render
-    env: docker                     # parce qu’on fournit un Dockerfile
-    region: frankfurt               # oregon (défaut) | frankfurt | singapore
-    plan: free                      # free = 512 Mo / 0.5 vCPU
-    branch: main                    # branche à déployer
+    name: n8n
+    env: docker
+    region: frankfurt        # oregon | frankfurt | singapore
+    plan: free
+    branch: main
     numInstances: 1
-    healthCheckPath: /healthz       # n8n expose /healthz
+    healthCheckPath: /healthz
+
     envVars:
-      # ───────── BDD n8n (Postgres) ─────────
+      # ──────── Base Postgres n8n ────────
       - key: DB_TYPE
         value: postgresdb
       - key: DB_POSTGRESDB_HOST
-        fromDatabase:
-          name: n8nDB
-          property: host
+        fromDatabase: { name: n8nDB, property: host }
       - key: DB_POSTGRESDB_DATABASE
-        fromDatabase:
-          name: n8nDB
-          property: database
+        fromDatabase: { name: n8nDB, property: database }
       - key: DB_POSTGRESDB_PORT
-        fromDatabase:
-          name: n8nDB
-          property: port
+        fromDatabase: { name: n8nDB, property: port }
       - key: DB_POSTGRESDB_USER
-        fromDatabase:
-          name: n8nDB
-          property: user
+        fromDatabase: { name: n8nDB, property: user }
       - key: DB_POSTGRESDB_PASSWORD
-        fromDatabase:
-          name: n8nDB
-          property: password
+        fromDatabase: { name: n8nDB, property: password }
 
-      # ───────── Réglages généraux n8n ──────
+      # ──────── Réglages généraux ────────
       - key: PORT
         value: "5678"
       - key: N8N_LOG_LEVEL
@@ -53,36 +42,44 @@ services:
         value: Europe/Paris
       - key: N8N_DEFAULT_LOCALE
         value: fr
-      - key: N8N_ENCRYPTION_KEY      # généré à la première création
+      - key: N8N_ENCRYPTION_KEY
         generateValue: true
 
-      # ───────── Sécurisation de l’UI n8n ───
+      # ──────── Sécurisation UI ──────────
       - key: N8N_BASIC_AUTH_ACTIVE
         value: "true"
       - key: N8N_BASIC_AUTH_USER
         value: admin
-      - key: N8N_BASIC_AUTH_PASSWORD # ➜ saisis la valeur via l’UI Render
+      - key: N8N_BASIC_AUTH_PASSWORD
         value: "<TON_MDP_UI_N8N>"
 
-      # ───────── URL publiques n8n ──────────
+      # ──────── URL publiques ────────────
       - key: N8N_HOST
-        value: n8n.onrender.com            # remplace par TON sous-domaine
+        value: n8n.onrender.com          # remplace par ton sous-domaine
       - key: N8N_PROTOCOL
         value: https
       - key: WEBHOOK_URL
-        value: https://n8n.onrender.com/    # sans /webhook/
+        value: https://n8n.onrender.com/ # sans /webhook/
 
-      # ───────── Accès IMAP pour Code node ─
+      # ──────── IMAP (Code node) ────────
       - key: IMAP_HOST
         value: imap.exemple.com
       - key: IMAP_PORT
         value: "993"
       - key: IMAP_USER
         value: login@exemple.com
-      - key: IMAP_PASS                  # ➜ saisis la valeur via l’UI Render
+      - key: IMAP_PASS
         value: "<TON_MDP_IMAP>"
       - key: IMAP_TLS
-        value: "true"                   # "false" si port 143 sans TLS
+        value: "true"
+
+      # ──────── Conformité / runners ─────
+      - key: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+        value: "true"
+      - key: N8N_RUNNERS_ENABLED
+        value: "true"          # active le mode « internal »
+      - key: N8N_RUNNERS_MAX_CONCURRENCY
+        value: "2"             # adapte si besoin
 
 databases:
   - name: n8nDB
