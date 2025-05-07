@@ -1,41 +1,37 @@
-############################################
-#  render.yaml – n8n + IMAP + task-runner  #
-############################################
-# Ressources créées :
-#   • Web Service  : n8n   (Docker, plan free)
-#   • PostgreSQL   : n8nDB (plan free)
-# Renseigne les valeurs marquées <…> dans
-# l’interface Render (Environment › Add Secret)
-############################################
-
 services:
   - type: web
     name: n8n
     env: docker
-    region: frankfurt          # oregon | frankfurt | singapore
-    plan: free                 # 512 Mo / 0 .5 vCPU
-    branch: main               # branche à déployer
+    region: frankfurt # optional (defaults to oregon)
+    plan: free # optional (defaults to starter)
+    branch: main # optional (defaults to master)
     numInstances: 1
     healthCheckPath: /healthz
-
     envVars:
-      # ───────── Base Postgres ─────────
       - key: DB_TYPE
         value: postgresdb
       - key: DB_POSTGRESDB_HOST
-        fromDatabase: { name: n8nDB, property: host }
+        fromDatabase:
+          name: n8nDB
+          property: host
       - key: DB_POSTGRESDB_DATABASE
-        fromDatabase: { name: n8nDB, property: database }
+        fromDatabase:
+          name: n8nDB
+          property: database
       - key: DB_POSTGRESDB_PORT
-        fromDatabase: { name: n8nDB, property: port }
+        fromDatabase:
+          name: n8nDB
+          property: port
       - key: DB_POSTGRESDB_USER
-        fromDatabase: { name: n8nDB, property: user }
+        fromDatabase:
+          name: n8nDB
+          property: user
       - key: DB_POSTGRESDB_PASSWORD
-        fromDatabase: { name: n8nDB, property: password }
-
-      # ───────── Réglages globaux ──────
+        fromDatabase:
+          name: n8nDB
+          property: password
       - key: PORT
-        value: "5678"
+        value: 5678
       - key: N8N_LOG_LEVEL
         value: info
       - key: GENERIC_TIMEZONE
@@ -44,49 +40,10 @@ services:
         value: Europe/Paris
       - key: N8N_DEFAULT_LOCALE
         value: fr
-      - key: N8N_ENCRYPTION_KEY          # généré une seule fois
+      - key: N8N_ENCRYPTION_KEY
         generateValue: true
-
-      # ───────── Sécurisation UI ───────
-      - key: N8N_BASIC_AUTH_ACTIVE
-        value: "true"
-      - key: N8N_BASIC_AUTH_USER
-        value: admin
-      - key: N8N_BASIC_AUTH_PASSWORD     # ➜ secret Render
-        value: "<TON_MDP_UI_N8N>"
-
-      # ───────── URL publiques ─────────
-      - key: N8N_HOST
-        value: n8n.onrender.com          # remplace par ton sous-domaine
-      - key: N8N_PROTOCOL
-        value: https
-      - key: WEBHOOK_URL
-        value: https://n8n.onrender.com/ # sans « /webhook/ »
-
-      # ───────── IMAP (Code node) ──────
-      - key: IMAP_HOST
-        value: imap.exemple.com
-      - key: IMAP_PORT
-        value: "993"
-      - key: IMAP_USER
-        value: login@exemple.com
-      - key: IMAP_PASS                  # ➜ secret Render
-        value: "<TON_MDP_IMAP>"
-      - key: IMAP_TLS
-        value: "true"
-
-      # ───────── Conformité & Runner ───
-      - key: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
-        value: "true"
-      - key: N8N_RUNNERS_ENABLED
-        value: "true"          # active le task-runner interne
-      - key: N8N_RUNNERS_MAX_CONCURRENCY
-        value: "2"             # limite pour le plan free
-      # Exclut l’endpoint interne /tasks de la Basic Auth
-      - key: N8N_AUTH_EXCLUDE_ENDPOINTS
-        value: tasks
 
 databases:
   - name: n8nDB
-    region: frankfurt
+    region: frankfurt # optional (defaults to oregon)
     plan: free

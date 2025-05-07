@@ -17,12 +17,7 @@ Follow these steps :
 8. Wait a minute for your instance to update
 9. Enjoy !
 
-### Variables d’environnement supplémentaires
 
-| Clé | Rôle |
-|-----|------|
-| `IMAP_HOST` / `IMAP_PORT` | Adresse et port du serveur IMAP |
-| `IMAP_USER` / `IMAP_PASS` | Identifiants IMAP |
-| `IMAP_TLS`                | `true` si connexion SSL (993) |
-| `WEBHOOK_URL`             | URL publique de l’instance (sans `/webhook/`) |
-| `N8N_BASIC_AUTH_*`        | Protection de l’interface n8n |
+This instance will be free for 90d, then you need to pay 7$/mo for the database.
+
+Created by Antoine Deschamps for La Machine. Inspired by ready4mars.
