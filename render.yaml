@@ -30,6 +30,10 @@ services:
         fromDatabase: { name: n8nDB, property: user }
       - key: DB_POSTGRESDB_PASSWORD
         fromDatabase: { name: n8nDB, property: password }
+      - key: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+        value: "true"
+      - key: N8N_RUNNERS_ENABLED
+        value: "true"
 
       # ──────── Réglages généraux ────────
       - key: PORT
