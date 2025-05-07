@@ -1,13 +1,24 @@
+############################################
+#  render.yaml – Déploiement n8n + IMAP    #
+############################################
+# Ce fichier crée :
+#  • 1 service Web « n8n » (plan gratuit)
+#  • 1 base PostgreSQL gratuite « n8nDB »
+# Remplis (ou saisis via l’UI Render) les
+# variables sensibles marquées « <…> ».
+############################################
+
 services:
   - type: web
-    name: n8n
-    env: docker
-    region: frankfurt # optional (defaults to oregon)
-    plan: free # optional (defaults to starter)
-    branch: main # optional (defaults to master)
+    name: n8n                       # nom du service Render
+    env: docker                     # parce qu’on fournit un Dockerfile
+    region: frankfurt               # oregon (défaut) | frankfurt | singapore
+    plan: free                      # free = 512 Mo / 0.5 vCPU
+    branch: main                    # branche à déployer
     numInstances: 1
-    healthCheckPath: /healthz
+    healthCheckPath: /healthz       # n8n expose /healthz
     envVars:
+      # ───────── BDD n8n (Postgres) ─────────
       - key: DB_TYPE
         value: postgresdb
       - key: DB_POSTGRESDB_HOST
@@ -30,8 +41,10 @@ services:
         fromDatabase:
           name: n8nDB
           property: password
+
+      # ───────── Réglages généraux n8n ──────
       - key: PORT
-        value: 5678
+        value: "5678"
       - key: N8N_LOG_LEVEL
         value: info
       - key: GENERIC_TIMEZONE
@@ -40,10 +53,38 @@ services:
         value: Europe/Paris
       - key: N8N_DEFAULT_LOCALE
         value: fr
-      - key: N8N_ENCRYPTION_KEY
+      - key: N8N_ENCRYPTION_KEY      # généré à la première création
         generateValue: true
+
+      # ───────── Sécurisation de l’UI n8n ───
+      - key: N8N_BASIC_AUTH_ACTIVE
+        value: "true"
+      - key: N8N_BASIC_AUTH_USER
+        value: admin
+      - key: N8N_BASIC_AUTH_PASSWORD # ➜ saisis la valeur via l’UI Render
+        value: "<TON_MDP_UI_N8N>"
+
+      # ───────── URL publiques n8n ──────────
+      - key: N8N_HOST
+        value: n8n.onrender.com            # remplace par TON sous-domaine
+      - key: N8N_PROTOCOL
+        value: https
+      - key: WEBHOOK_URL
+        value: https://n8n.onrender.com/    # sans /webhook/
+
+      # ───────── Accès IMAP pour Code node ─
+      - key: IMAP_HOST
+        value: imap.exemple.com
+      - key: IMAP_PORT
+        value: "993"
+      - key: IMAP_USER
+        value: login@exemple.com
+      - key: IMAP_PASS                  # ➜ saisis la valeur via l’UI Render
+        value: "<TON_MDP_IMAP>"
+      - key: IMAP_TLS
+        value: "true"                   # "false" si port 143 sans TLS
 
 databases:
   - name: n8nDB
-    region: frankfurt # optional (defaults to oregon)
+    region: frankfurt
     plan: free
